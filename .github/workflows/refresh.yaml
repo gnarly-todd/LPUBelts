@@ -1,6 +1,3 @@
-> Save this file in your repo at .github/workflows/refresh.yml
-> (the folder path matters; the filename doesn't).
-
 name: Refresh lock data
 
 on:
