@@ -1,0 +1,37 @@
+> Save this file in your repo at .github/workflows/refresh.yml
+> (the folder path matters; the filename doesn't).
+
+name: Refresh lock data
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"      # Mondays, 06:17 UTC
+  workflow_dispatch: {}        # also runnable by hand from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Rebuild the snapshot from lpubelts.com
+        run: python3 refresh-lpu-data.py --app index.html
+
+      - name: Commit if anything changed
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "Ranked list unchanged. Nothing to commit."
+            exit 0
+          fi
+          git config user.name  "belt-explorer-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Refresh lock data ($(date -u +%Y-%m-%d))"
+          git push
